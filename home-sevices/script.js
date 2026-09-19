@@ -2,7 +2,10 @@ const GA_ID = "G-987ESMD68T";
 
 function trackEvent(name, params = {}) {
   if (typeof window.gtag === "function") {
-    window.gtag("event", name, params);
+    window.gtag("event", name, {
+      ...params,
+      debug_mode: true
+    });
   }
 }
 
