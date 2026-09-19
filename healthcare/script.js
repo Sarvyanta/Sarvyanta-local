@@ -1,73 +1,56 @@
-function trackEvent(name, params = {}) {
+const GA_ID = "G-987ESMD68T";
 
+function trackEvent(name, params = {}) {
   if (typeof window.gtag === "function") {
     window.gtag("event", name, params);
   }
-
 }
 
+document.addEventListener("DOMContentLoaded", () => {
 
-document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll("[data-track]").forEach((element) => {
 
-  document.querySelectorAll("[data-track]").forEach(function (element) {
+    element.addEventListener("click", () => {
 
-    element.addEventListener("click", function () {
+      const eventName = element.dataset.track;
 
-      trackEvent(
-        element.dataset.track,
-        {
-          page_type: document.body.dataset.pageType || "page",
-          category: element.dataset.category || "",
-          service: element.dataset.service || "",
-          locality: element.dataset.locality || "",
-          link_text: (element.textContent || "")
-            .trim()
-            .slice(0, 100)
-        }
-      );
+      const params = {
+        page_type: document.body.dataset.pageType || "page",
+        category: element.dataset.category || "",
+        service: element.dataset.service || "",
+        locality: element.dataset.locality || "",
+        link_text: (element.textContent || "").trim().slice(0, 100)
+      };
 
+      trackEvent(eventName, params);
     });
-
   });
 
+  let maxScroll = 0;
 
-  let highestScroll = 0;
+  window.addEventListener("scroll", () => {
 
-  window.addEventListener("scroll", function () {
+    const scrollable =
+      document.documentElement.scrollHeight - window.innerHeight;
 
-    const total =
-      document.documentElement.scrollHeight -
-      window.innerHeight;
+    if (scrollable <= 0) return;
 
-    if (total <= 0) {
-      return;
-    }
+    const percent =
+      Math.round((window.scrollY / scrollable) * 100);
 
-    const percentage =
-      Math.round((window.scrollY / total) * 100);
+    const milestones = [25, 50, 75, 90];
 
-    [25, 50, 75, 90].forEach(function (milestone) {
+    milestones.forEach((m) => {
 
-      if (
-        percentage >= milestone &&
-        highestScroll < milestone
-      ) {
+      if (percent >= m && maxScroll < m) {
 
-        highestScroll = milestone;
+        maxScroll = m;
 
-        trackEvent(
-          "scroll_depth",
-          {
-            percent_scrolled: milestone,
-            page_type:
-              document.body.dataset.pageType || "page"
-          }
-        );
-
+        trackEvent("scroll_depth", {
+          percent_scrolled: m,
+          page_type: document.body.dataset.pageType || "page"
+        });
       }
-
     });
-
   });
-
 });
